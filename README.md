@@ -32,14 +32,16 @@ samples, guidance on mobile development, and a full API reference.
 - 如果要修改可以在 `config/mysql.js` 中手动修改，然后，重新启动接口服务即可
 
 # 3、数据库导入数据库文件，运行
-#数据库文件路径：数据库相关文件/hkzf_v1/db/hkzf_db.sql
+数据库文件路径：数据库相关文件/hkzf_v1/db/hkzf_db.sql
 
 # 4、打开终端，输入命令
 cd *** /hkzf_v1
+
 npm start
-#如无意外就会显示数据库连接成功，本地服务就搭建好了^o^
+
+如无意外就会显示数据库连接成功，本地服务就搭建好了^o^
 
 
 # 5、使用vscode打开项目，运行项目
-#终端输入：flutter run --no-sound-null-safety
+终端输入：flutter run --no-sound-null-safety
 
