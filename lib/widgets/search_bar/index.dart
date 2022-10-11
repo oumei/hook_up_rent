@@ -127,7 +127,9 @@ class _SearchBarState extends State<SearchBar> {
             Padding(
               padding: const EdgeInsets.only(right: 10.0),
               child: GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  widget.goBackCallback!();
+                },
                 child: const Icon(
                   Icons.chevron_left,
                   color: Colors.black87,
@@ -147,7 +149,7 @@ class _SearchBarState extends State<SearchBar> {
                 if(widget.onSearchSubmit==null){
                   _focus?.unfocus();
                 }
-                widget.onSearch!();
+                if (widget.onSearch != null)widget.onSearch!();
               },
               onSubmitted: widget.onSearchSubmit,
               textInputAction: TextInputAction.search,
@@ -184,7 +186,9 @@ class _SearchBarState extends State<SearchBar> {
             Padding(
               padding: const EdgeInsets.only(right: 10.0),
               child: GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    widget.onCancel!();
+                  },
                   child: const Text(
                     '取消',
                     style: TextStyle(fontSize: 14.0, color: Colors.black),

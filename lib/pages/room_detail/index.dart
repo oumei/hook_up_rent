@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:hook_up_rent/config.dart';
 import 'package:hook_up_rent/models/room_detail_data.dart';
 import 'package:hook_up_rent/pages/home/info/index.dart';
-import 'package:hook_up_rent/pages/room_detail/data.dart';
+// import 'package:hook_up_rent/pages/room_detail/data.dart';
+import 'package:hook_up_rent/utils/dio_http.dart';
 import 'package:hook_up_rent/widgets/common_swipper.dart';
 import 'package:hook_up_rent/widgets/common_tag.dart';
 import 'package:hook_up_rent/widgets/common_title.dart';
@@ -24,11 +28,27 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
   bool isLike = false;
   bool showAllText = false;
 
+  _getData() async{
+    final url='/houses/${widget.roomId}';
+    var res = await DioHttp.of(context).get(url);
+    var resMap = json.decode(res.toString());
+    var resData = resMap['body'];
+    var roomDetailData = RoomDetailData.fromJson(resData);
+
+    roomDetailData.houseImgs=roomDetailData.houseImgs.map((e) => Config.BaseUrl+e).toList();
+    
+    setState(() {
+      data = roomDetailData;
+    });
+  }
+
   @override
   void initState() {
-    setState(() {
-      data = defaultData;
-    });
+    _getData();
+    //假数据
+    // setState(() {
+    //   data = defaultData;
+    // });
     super.initState();
   }
 

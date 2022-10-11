@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hook_up_rent/utils/common_picker/index.dart';
+import 'package:hook_up_rent/utils/common_toast.dart';
 import 'package:hook_up_rent/widgets/common_form_item.dart';
 
 class CommonSelectFormItem extends StatelessWidget {
@@ -24,6 +25,10 @@ class CommonSelectFormItem extends StatelessWidget {
         return GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
+            if(options.isEmpty){
+              CommonToast.showToast('暂无选择内容');
+              return;
+            }
             var result = CommonPicker.showPicker(context, options, value);
             result.then((selectedValue) {
               if (value != selectedValue && selectedValue != null) {
@@ -37,7 +42,7 @@ class CommonSelectFormItem extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  options[value],
+                  options.isEmpty?'':options[value],
                   style: const TextStyle(fontSize: 16.0),
                 ),
                 const Icon(Icons.keyboard_arrow_right),

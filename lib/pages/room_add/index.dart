@@ -1,6 +1,16 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:hook_up_rent/models/community.dart';
+import 'package:hook_up_rent/models/general_type.dart';
+import 'package:hook_up_rent/scoped_model/auth.dart';
+import 'package:hook_up_rent/utils/common_toast.dart';
+import 'package:hook_up_rent/utils/dio_http.dart';
+import 'package:hook_up_rent/utils/scoped_model_helper.dart';
+import 'package:hook_up_rent/utils/string_is_null_or_empty.dart';
+import 'package:hook_up_rent/utils/upload_images.dart';
 import 'package:hook_up_rent/widgets/common_floating_action_button.dart';
 import 'package:hook_up_rent/widgets/common_form_item.dart';
 import 'package:hook_up_rent/widgets/common_image_picker.dart';
@@ -17,13 +27,93 @@ class RoomAddPage extends StatefulWidget {
 }
 
 class _RoomAddPageState extends State<RoomAddPage> {
+  List<GeneralType> floorList = [];
+  List<GeneralType> orientedList = [];
+  List<GeneralType> roomTypeList = [];
   int rentType = 0;
   int decorationType = 0;
   int roomType = 0;
   int floor = 0;
   int oriented = 0;
+  List<File> images = [];
+
   var titleController = TextEditingController();
   var descController = TextEditingController();
+  var sizeController = TextEditingController();
+  var priceController = TextEditingController();
+
+  Community? community;
+  List<RoomApplianceItem>? applicanceList;
+
+  _getParams() async {
+    String url = '/houses/params';
+    var res = await DioHttp.of(context).get(url);
+    var data = json.decode(res.toString())['body'];
+    List<GeneralType> floorList = List<GeneralType>.from(
+        data['floor'].map((item) => GeneralType.fromJson(item)).toList());
+    List<GeneralType> orientedList = List<GeneralType>.from(
+        data['oriented'].map((item) => GeneralType.fromJson(item)).toList());
+    List<GeneralType> roomTypeList = List<GeneralType>.from(
+        data['roomType'].map((item) => GeneralType.fromJson(item)).toList());
+
+    setState(() {
+      this.floorList = floorList;
+      this.orientedList = orientedList;
+      this.roomTypeList = roomTypeList;
+    });
+  }
+
+  @override
+  void initState() {
+    Timer.run(_getParams);
+    super.initState();
+  }
+
+  _submit() async {
+    var size = sizeController.text;
+    var price = priceController.text;
+    if (stringIsNullOrEmpty(size)){
+      CommonToast.showToast('大小不能为空');
+      return;
+    }
+    if (stringIsNullOrEmpty(price)){
+      CommonToast.showToast('租金不能为空');
+      return;
+    }
+    if (community == null){
+      CommonToast.showToast('小区不能为空');
+      return;
+    }
+    var imageString = await uploadImages(images, context);
+    Map<String,dynamic> params = {
+      'title':titleController.text,
+      'description':descController.text,
+      'price':price,
+      'size':size,
+      'oriented':orientedList[oriented].id,
+      'roomType':roomTypeList[roomType].id,
+      'floor':floorList[floor].id,
+      'community':community!.id,
+      'houseImg':imageString,
+      'supporting':applicanceList == null ? '' : applicanceList!.map((e) => e.title).join('|'),
+    };
+    var token = ScopedModelHelper.getModel<AuthModel>(context).token;
+    String url = '/user/houses';
+    
+    var res = await DioHttp.of(context).post(url,params,token).catchError((onError){
+      CommonToast.showToast(onError.error);
+    });
+    var status = json.decode(res.toString())['status'];
+    if(status.toString().startsWith('2')){
+      CommonToast.showToast('房源发布成功');
+      bool isSubmitted = true;
+      Navigator.of(context).pop(isSubmitted);
+    } else {
+      var desc = json.decode(res.toString())['description'];
+      CommonToast.showToast(desc);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,15 +131,22 @@ class _RoomAddPageState extends State<RoomAddPage> {
                 //默认空白区域点击事件不生效，需要设置 behavior
                 behavior: HitTestBehavior.translucent,
                 onTap: () {
-                  Navigator.of(context).pushNamed('search');
+                  var result = Navigator.of(context).pushNamed('communityPicker');
+                  result.then((value) {
+                    if(value != null) {
+                      setState(() {
+                        community = value as Community?;
+                      });
+                    }
+                  });
                 },
                 child: Container(
                   height: 40.0,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       Text(
-                        '请选择小区',
+                        community != null?community!.name:'请选择小区',
                         style: TextStyle(fontSize: 16.0),
                       ),
                       Icon(Icons.keyboard_arrow_right),
@@ -63,13 +160,13 @@ class _RoomAddPageState extends State<RoomAddPage> {
             label: '租金',
             hintText: '请输入租金',
             suffixText: '元/月',
-            controller: TextEditingController(),
+            controller: priceController,
           ),
           CommonFormItem(
             label: '大小',
             hintText: '请输入房屋大小',
             suffixText: '平方米',
-            controller: TextEditingController(),
+            controller: sizeController,
           ),
           CommonRadioFormItem(
               label: '租赁方式',
@@ -80,9 +177,9 @@ class _RoomAddPageState extends State<RoomAddPage> {
                   rentType = index!;
                 });
               }),
-          CommonSelectFormItem(
+          if(roomTypeList.isNotEmpty)CommonSelectFormItem(
             label: '户型',
-            options: const ['一室', '二室', '三室', '四室'],
+            options: roomTypeList.map((e) => e.name).toList(),
             value: roomType,
             onChanged: (value) {
               setState(() {
@@ -90,9 +187,9 @@ class _RoomAddPageState extends State<RoomAddPage> {
               });
             },
           ),
-          CommonSelectFormItem(
+          if(floorList.isNotEmpty)CommonSelectFormItem(
             label: '楼层',
-            options: const ['高楼层', '中楼层', '低楼层'],
+            options: floorList.map((e) => e.name).toList(),
             value: floor,
             onChanged: (value) {
               setState(() {
@@ -100,9 +197,9 @@ class _RoomAddPageState extends State<RoomAddPage> {
               });
             },
           ),
-          CommonSelectFormItem(
+          if(orientedList.isNotEmpty)CommonSelectFormItem(
             label: '朝向',
-            options: const ['东', '南', '西', '北'],
+            options: orientedList.map((e) => e.name).toList(),
             value: oriented,
             onChanged: (value) {
               setState(() {
@@ -120,7 +217,11 @@ class _RoomAddPageState extends State<RoomAddPage> {
                 });
               }),
           CommonTitle('房屋图像'),
-          CommonImagePicker(onChanged: (List<File> files) {}),
+          CommonImagePicker(onChanged: (List<File> files) {
+            setState(() {
+              images = files;
+            });
+          }),
           CommonTitle('房屋标题'),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10.0), //水平方向
@@ -133,9 +234,11 @@ class _RoomAddPageState extends State<RoomAddPage> {
             ),
           ),
           CommonTitle('房屋配置'),
-          RoomAppliance(onChanged: (data) {
-            
-          },),
+          RoomAppliance(
+            onChanged: (data) {
+              applicanceList = data;
+            },
+          ),
           CommonTitle('房屋描述'),
           Container(
             margin: const EdgeInsets.only(bottom: 100.0),
@@ -152,7 +255,7 @@ class _RoomAddPageState extends State<RoomAddPage> {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: CommonFloatingActionButton('提交', () {}),
+      floatingActionButton: CommonFloatingActionButton('提交', _submit),
     );
   }
 }
