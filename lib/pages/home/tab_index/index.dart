@@ -29,7 +29,6 @@ class TabIndex extends StatelessWidget {
         IndexNavigator(),
         IndexRecommond(),
         Info(showTitle: true,),
-        Text('这里是内容区域'),
       ],),
     );
   }

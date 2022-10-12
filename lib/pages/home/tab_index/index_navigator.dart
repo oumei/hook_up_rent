@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hook_up_rent/scoped_model/auth.dart';
+import 'package:hook_up_rent/utils/scoped_model_helper.dart';
 import 'package:hook_up_rent/widgets/common_image.dart';
 import './index_navigator_item.dart';
 
@@ -13,7 +15,11 @@ class IndexNavigator extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: indexNavigatorItemList.map((e) => InkWell(
               onTap: () {
-                e.onTap(context);
+                if (ScopedModelHelper.getModel<AuthModel>(context).isLogin){
+                  Navigator.of(context).pushNamed('routeName');
+                } else {
+                  e.onTap(context);
+                }
               },
               child: Column(children: [
                 CommonImage(e.imageUri,width: 47.5,),

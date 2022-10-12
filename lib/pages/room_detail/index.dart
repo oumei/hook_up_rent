@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -28,15 +29,16 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
   bool isLike = false;
   bool showAllText = false;
 
-  _getData() async{
-    final url='/houses/${widget.roomId}';
+  _getData() async {
+    final url = '/houses/${widget.roomId}';
     var res = await DioHttp.of(context).get(url);
     var resMap = json.decode(res.toString());
     var resData = resMap['body'];
     var roomDetailData = RoomDetailData.fromJson(resData);
 
-    roomDetailData.houseImgs=roomDetailData.houseImgs.map((e) => Config.BaseUrl+e).toList();
-    
+    roomDetailData.houseImgs =
+        roomDetailData.houseImgs.map((e) => Config.BaseUrl + e).toList();
+
     setState(() {
       data = roomDetailData;
     });
@@ -54,7 +56,17 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (data == null) return Container();
+    if (data == null) {
+      return Container(
+        decoration: const BoxDecoration(color: Colors.white),
+        child: const Center(
+          child: Text(
+            '加载中...',
+            style: TextStyle(fontSize: 16,color: Colors.black87),
+          ),
+        ),
+      );
+    }
     bool showTextTool = data!.subTitle.length > 100;
     return Scaffold(
       appBar: AppBar(
@@ -131,19 +143,23 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        showTextTool ? GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              showAllText = !showAllText;
-                            });
-                          },
-                          child: Row(
-                            children: [
-                              Text(showAllText ? '收起' : '展开'),
-                              Icon(showAllText ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down),
-                            ],
-                          ),
-                        ) : Container(),
+                        showTextTool
+                            ? GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    showAllText = !showAllText;
+                                  });
+                                },
+                                child: Row(
+                                  children: [
+                                    Text(showAllText ? '收起' : '展开'),
+                                    Icon(showAllText
+                                        ? Icons.keyboard_arrow_up
+                                        : Icons.keyboard_arrow_down),
+                                  ],
+                                ),
+                              )
+                            : Container(),
                         const Text('举报')
                       ],
                     )

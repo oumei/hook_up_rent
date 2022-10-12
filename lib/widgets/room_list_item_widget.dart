@@ -14,6 +14,7 @@ class RoomListItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     var imageUrl = data.imageUri.startsWith('http')?data.imageUri:Config.BaseUrl+data.imageUri;
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       onTap: () {
         Navigator.of(context).pushNamed('roomDetail/${data.id}');
       },
