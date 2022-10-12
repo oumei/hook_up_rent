@@ -36,6 +36,12 @@ class DioHttp {
         }
         if (status.toString().startsWith('4')){
           ScopedModelHelper.getModel<AuthModel>(context).logout();
+
+          //在启动页识别到token过期就不需要跳转到登录页面
+          if (ModalRoute.of(context)?.settings.name == Routes.loading) {
+            return handler.next(res);
+          }
+
           CommonToast.showToast('登陆过期！');
           Navigator.of(context).pushNamed(Routes.login);
           return handler.next(res);

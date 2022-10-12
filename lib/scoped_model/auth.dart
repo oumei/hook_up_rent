@@ -16,10 +16,10 @@ class AuthModel extends Model {
 
   bool get isLogin=>_token is String && _token != '';
 
-  void initApp(BuildContext context)async{
+  void initApp(BuildContext context) async{
     Store store = await Store.getInstance();
     String token = await store.getString(StoreKeys.token);
-    if(stringIsNullOrEmpty(token)){
+    if(!stringIsNullOrEmpty(token)){
       login(token, context);
     }
   }
@@ -40,9 +40,11 @@ class AuthModel extends Model {
     _getUserInfo(context);
   }
 
-  void logout(){
+  void logout() async{
     _token = '';
     _userInfo = null;
     notifyListeners();
+    Store store = await Store.getInstance();
+    await store.setString(StoreKeys.token,'');
   }
 }

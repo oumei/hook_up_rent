@@ -130,4 +130,5 @@ flutter:
      - static/images/home_profile_contract.png
      - static/images/home_profile_house.png
      - static/images/home_profile_wallet.png
+     - static/images/loading.jpg
      

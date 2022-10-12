@@ -11,6 +11,7 @@ class TabProfile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         elevation: 0,
         title: const Text('我的'),
         actions: [

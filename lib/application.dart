@@ -17,6 +17,7 @@ class Application extends StatelessWidget {
     final router = FluroRouter();
     Routes.configureRoutes(router);
     final app = MaterialApp(
+      initialRoute: Routes.loading,
       onGenerateRoute: router.generator,
       theme: ThemeData(
           colorScheme: const ColorScheme.light(

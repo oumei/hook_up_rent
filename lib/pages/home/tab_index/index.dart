@@ -14,6 +14,7 @@ class TabIndex extends StatelessWidget {
     
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: SearchBar(
           showLocation: true,
           showMap: true,

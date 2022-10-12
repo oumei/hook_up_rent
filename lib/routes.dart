@@ -3,6 +3,7 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:hook_up_rent/pages/community_picker.dart';
 import 'package:hook_up_rent/pages/home/index.dart';
+import 'package:hook_up_rent/pages/loading.dart';
 import 'package:hook_up_rent/pages/login.dart';
 import 'package:hook_up_rent/pages/not_found.dart';
 import 'package:hook_up_rent/pages/register.dart';
@@ -22,6 +23,7 @@ class Routes {
   static String roomManage='/roomManage';
   static String roomAdd='/roomAdd';
   static String communityPicker='/communityPicker';
+  static String loading='/loading';
 
   //2、定义路由处理函数
   static final Handler _homeHandler = Handler(handlerFunc: (context, parameters) {
@@ -60,6 +62,10 @@ class Routes {
     return  const CommunityPickerPage();
   });
 
+  static final Handler _loadingHandler = Handler(handlerFunc: (context, parameters) {
+    return  const LoadingPage();
+  });
+
   //3、编写函数 configureRoutes 关联路由名称和处理函数
   static void configureRoutes(FluroRouter router) {
     router.define(home, handler: _homeHandler);
@@ -70,6 +76,7 @@ class Routes {
     router.define(roomManage, handler: _roomManageHandler);
     router.define(roomAdd, handler: _roomAddHandler);
     router.define(communityPicker, handler: _communityPickerHandler);
+    router.define(loading, handler: _loadingHandler);
     router.notFoundHandler=_notFoundHandler;
   }
 }
